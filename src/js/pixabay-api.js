@@ -10,9 +10,17 @@ import axios from "axios";
 
 
 const BASE_URL = "https://pixabay.com/api/";
+const per_page = 15;
 
-export function getImagesByQuery(query) {
-    return axios
+
+// У файлі pixabay-api.js зберігай функції для виконання HTTP-запитів:
+
+// getImagesByQuery(query, page). Ця функція повинна приймати два параметри query (пошукове слово, яке є рядком) та page (номер сторінки, яка є числом), здійснювати HTTP-запит і повертати значення властивості data з отриманої відповіді.
+
+
+export async function getImagesByQuery(query, page) {
+    try {
+        const response = await axios
   .get(BASE_URL, {
     params: {
         key: "55989739-dc7d8052769ba2cd59e59f330",
@@ -20,14 +28,16 @@ export function getImagesByQuery(query) {
         image_type: "photo",
         orientation: "horizontal",
         safesearch: true,
+        page: page,
+        per_page: per_page,
     },
   })
-        .then((response) => {
-            return response.data; 
-        })
-        .catch((error) => {
-            throw error; 
-        });
+            
+    return response.data;
+    } catch {
+        throw error;
+    } 
+
 };
 
 
@@ -53,6 +63,15 @@ export function showValidationError() {
 export function showGenericError() {
     iziToast.show({
         message: 'Something went wrong',
+        messageColor: 'white',
+        backgroundColor: 'red',
+        position: 'topRight',
+    });
+}
+
+export function showTotalPagesError() {
+    iziToast.show({
+        message: "We're sorry, but you've reached the end of search results.",
         messageColor: 'white',
         backgroundColor: 'red',
         position: 'topRight',
