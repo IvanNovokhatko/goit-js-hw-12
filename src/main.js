@@ -21,10 +21,10 @@ let searchWord;
 let totalPages;
 
 // cardWidth
-let cardWidth;
+let cardHeight;
 
 // Add the event-listener to myForm
-const onMyFormSubmit = (event) => {
+const onMyFormSubmit = async (event) => {
     event.preventDefault();
 
     if (myFormInput.value.trim() === "") {
@@ -38,8 +38,9 @@ const onMyFormSubmit = (event) => {
 
     searchWord = myFormInput.value.trim();
 
-    getImagesByQuery(searchWord, page)
-        .then((data) => {
+    try {
+        const data = await getImagesByQuery(searchWord, page)
+
             if (data.hits.length === 0) {
       throw new Error("EMPTY_RESULT");
             }
@@ -49,65 +50,66 @@ const onMyFormSubmit = (event) => {
 
             let elem = document.querySelector(".gallery-item");
             let rect = elem.getBoundingClientRect();
-            cardWidth = rect.bottom + rect.height;
-        })
-        .catch((error) => {
-            const message = error.message === "EMPTY_RESULT" 
-            ? showEmptyWarning()
-            : showGenericError();
-      
-      return []; 
-        })
-        .finally(() => {
-            hideLoader();
-            myForm.reset();
-            page += 1;
-
-            if (page >= totalPages) {
+        cardHeight = rect.height;
+        
+        if (page >= totalPages) {
                 hideLoadMoreButton();
                 showTotalPagesError();
             } else {
                 showLoadMoreButton();
             };
-  });
+    } catch (error) {
+         const message = error.message === "EMPTY_RESULT" 
+            ? showEmptyWarning()
+            : showGenericError();
+      
+        return [];
+        
+    } finally {
+        hideLoader();
+            myForm.reset();
+    }
 };
 
 // Add the evennt-listener to myLoadMore
-const onMyLoadMoreClick = (event) => {
+const onMyLoadMoreClick = async (event) => {
     hideLoadMoreButton();
     showLoader();
 
-    getImagesByQuery(searchWord, page)
-        .then((data) => {
+    page += 1;
+
+    try {
+        const data = await getImagesByQuery(searchWord, page)
+        
             if (data.hits.length === 0) {
       throw new Error("EMPTY_RESULT");
             }
 
-            createGallery(data.hits);
+        createGallery(data.hits);
+        totalPages = Math.ceil(data.totalHits / per_page);
+        
             window.scrollBy({
-                top: cardWidth * 2,
+                top: cardHeight * 2,
                 left: 0,
                 behavior: "smooth",
             });
-        })
-        .catch((error) => {
-            const message = error.message === "EMPTY_RESULT" 
-            ? showEmptyWarning()
-            : showGenericError();
-      
-      return []; 
-        })
-        .finally(() => {
-            hideLoader();
-            page += 1;
-
-            if (page >= totalPages) {
-                hideLoadMore();
+    
+        if (page >= totalPages) {
+                hideLoadMoreButton();
                 showTotalPagesError();
             } else {
                 showLoadMoreButton();
             };
-  });
+    } catch (error) {
+        const message = error.message === "EMPTY_RESULT" 
+            ? showEmptyWarning()
+            : showGenericError();
+      
+        return []; 
+        
+    } finally {
+        hideLoader();
+    }
 }
 
 myForm.addEventListener("submit", onMyFormSubmit);

@@ -146,6 +146,7 @@
 
   li {
     width: calc((100% - (2 * 24px)) / 3);
+    height: 200px;
 
     box-sizing: border-box;
 
