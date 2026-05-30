@@ -34,7 +34,7 @@ export async function getImagesByQuery(query, page) {
   })
             
     return response.data;
-    } catch {
+    } catch (error) {
         throw error;
     } 
 
